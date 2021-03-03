@@ -2,5 +2,5 @@
 #define _HEADER_H
 #include <stdio.h>
 #include <stdlib.h>
-typedef long int li;
+typedef unsigned long  li;
 #endif
