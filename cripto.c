@@ -1,102 +1,79 @@
-# include "header.h"
+#include "cripto.h"
 
 void print(li *v, int N) {
-  printf("Criba de eratostenes es\n");
-  for(int i = 0; i < N; i++) {
-		printf("%lu ",v[i]);
+	printf("\nCriba de eratostenes es\n");
+	for (int i = 0; i < N; i++) {
+		printf("%lu ", v[i]);
 	}
+	printf("\n");
 }
 
-li *criba(int *N){
-	printf(" n = %d ",*N);
-	li i, h;
-	li *m = calloc(*N, sizeof(li));
-	li *rt = calloc(*N, sizeof(li));
-	m[0] = m[1] = 0;
-	for( i = 2; i <= *N; ++i)
-	     m[i] = i;
-		 for(li j = 2; j*j <= *N; ++j) {
-			if(m[j]) {
-				for(h = 2; j*h <= *N; ++h)
-					m[j*h] = 0;
-			}
-		 }
+li *cribaEratostenes(int N, li *j) {
+	li *m = (li *)calloc(N + 1, sizeof(li));
+	li *rt = (li *)calloc(1, sizeof(li));
+	m[0] = m[1] = false;
+	for (int i = 2; i <= N; ++i) m[i] = i;
+	for (int i = 2; i * i <= N; ++i)
+		if (m[i])
+			for (int h = 2; i * h <= N; ++h) m[i * h] = false;
 
-	li j = 0;
-	for(int i = 0; i < *N; i++)
-		if( m[i] ) {
-		  rt = (li*)realloc(rt, (j+1)*sizeof(li));
-		  rt[j++] = m[i];
+	*j = 0;
+	for (int i = 0; i < N; i++)
+		if (m[i]) {
+			printf("%lu ", m[i]);
+			rt = (li *)realloc(rt, (*j + 1) * sizeof(li));
+			rt[(*j)++] = m[i];
 		}
-	printf(" n = %lu ",j);
-	
-	*N = j;
-	free (m);
+
+	free(m);
 	return rt;
 }
 
-li mod(li a, li b){
- return a % b;
-}
+li mod(li a, li b) { return a % b; }
 
 li mcd(li a, li b) {
- return 0;
+	if (!b) return a;
+	return mcd(b, mod(a, b));
 }
 
-li cribaEratostenes(li p) {
+li* factorizacion(li p, li *N) {
+	li i = 0, j;
+	li k = 0;
+	li *criba = cribaEratostenes(p / 2, &j), *rt = (li *)calloc(1, sizeof(li));
 
- return 0;
-}
-
-li factorizacion(li p) {
-
- return 0;
-}
-
-int  option(int opt, li a, li b, li p) {
-  switch(opt){
-	case 1:
-	  mod(a,b);
-	break;
-	case 2:
-	  mcd(a,b);
-	break;
-	case 3:
-	  cribaEratostenes(p);
-	break;
-	case 4:
-	  factorizacion(p);
-	  break;
-	default:
-	  return 1;
-  }
-  return 0;
-}
-
-int main(int argc, char *argv[]) {
-  if( argc <= 2) {
-	  printf("parmatros para '%s' opt a b p\n", argv[0]);
-	  return 1;
+	while (p != criba[i]) {
+		if (!mod(p, criba[i])) {
+			p /= criba[i];
+			rt = realloc(rt, (k + 1) * sizeof(li));
+			rt[k++] = criba[i];
+		} else
+			i++;
 	}
+	*N = k;
+	return rt;
+}
 
-	int opt = atoi(argv[1]);
-	if(opt < 1 || opt > 4){
-	  printf("opt 1 -> modulo \n\
-			2 -> mcd \n\
-			3 -> cribaEratostenes \n\
-			4 -> factorizacion\n");
-	  return 1;
+li *option(int opt, li a, li b, li p, li *j) {
+	li *rt;
+	switch (opt) {
+		case 1:
+			rt = malloc(8);
+			rt[0] = mod(a, b);
+			*j = 1;
+			break;
+		case 2:
+			rt = malloc(8);
+			rt[0] = mcd(a, b);
+			*j = 1;
+			break;
+		case 3:
+			rt = cribaEratostenes(a, j);
+			break;
+		case 4:
+			rt = factorizacion(p,j);
+			break;
+		default:
+			return NULL;
 	}
-	  //printf("Criba de eratostenes es\n");
-	int *N;
-	int N1 = 6;
-	N = &N1;
-	print(criba(N),N1);
-	int a = atol(argv[2]);
-	int b = atol(argv[3]);
-	int p = atol(argv[4]);
-
-	if(!option(opt,a,b,p))
-	  return 1;
-return 0;
+	return rt;
 }
