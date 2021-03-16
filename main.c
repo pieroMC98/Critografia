@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
 	int a = atol(argv[1]);
 	int b = atol(argv[2]);
 	int p = atol(argv[3]);
-	li *sol= option(a, b, p, &j);
+	li *sol = option(a, b, p, &j);
 	if (sol == NULL) return 1;
 	print(sol, j);
 	free(sol);

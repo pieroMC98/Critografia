@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-typedef unsigned long li;
+#include <math.h>
+typedef long int li;
 #define true 1
 #define false 0
 #endif
