@@ -43,14 +43,18 @@ li *factorizacion(li p, li *N) {
 	li *criba, *rt = (li *)calloc(1, sizeof(li));
 
 	criba = cribaEratostenes((li)sqrtl(p), &j);
-	print(criba,j);
-	while (p >= criba[i]) {
+	while (i < j) {
 		if (!mod(p, criba[i])) {
 			p /= criba[i];
 			rt = realloc(rt, (k + 1) * sizeof(li));
 			rt[k++] = criba[i];
 		} else
 			i++;
+	}
+
+	if (p != 1) {
+		rt = realloc(rt, (k + 1) * sizeof(li));
+		rt[k++] = p;
 	}
 
 	rt = realloc(rt, (k + 1) * sizeof(li));
@@ -63,11 +67,13 @@ li *factorizacion(li p, li *N) {
 li randomOdd(li p) {
 	li j;
 	li aux;
+	li *c;
 	do {
 		aux = randomp(p);
-		factorizacion(aux, &j);
+		c = factorizacion(aux, &j);
 	} while (j != 2);
-	printf("un primo aleatorio de %lu es %lu\n",p,aux);
+	printf("un primo aleatorio de %lu es %lu\n", p, aux);
+	free(c);
 	return aux;
 }
 
@@ -85,16 +91,15 @@ li *option(li a, li b, li p, li *j) {
 
 	scanf("%d", &opt);
 
+	*j = 1;
 	switch (opt) {
 		case 1:
 			rt = malloc(sizeof(li));
 			rt[0] = mod(a, b);
-			*j = 1;
 			break;
 		case 2:
 			rt = malloc(sizeof(li));
 			rt[0] = mcd(a, b);
-			*j = 1;
 			break;
 		case 3:
 			rt = cribaEratostenes(a, j);
@@ -105,11 +110,12 @@ li *option(li a, li b, li p, li *j) {
 		case 5:
 			rt = malloc(sizeof(li));
 			rt[0] = randomp(p);
+			break;
 		case 6:
 			rt = malloc(sizeof(li));
 			rt[0] = randomOdd(p);
-		case 7:
-			;
+			break;
+		case 7:;
 		default:
 			return NULL;
 	}
