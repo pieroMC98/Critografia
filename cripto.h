@@ -7,3 +7,8 @@ li* factorizacion(li, li*);
 li* option(li, li, li, li*);
 li randomOdd(li);
 li randomp(li);
+int op();
+li* bezout(li, li);
+void euclidesExtendido(li, li);
+li* inverso(li, li);
+li* exponenciacion(li, li);
