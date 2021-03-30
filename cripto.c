@@ -78,31 +78,37 @@ li randomOdd(li p) {
 }
 
 li *bezout(li a, li b) {
-	li **rt = (li **)calloc(3, sizeof(li *));
+	li **rt = (li **)calloc(2, sizeof(li *));
+	for (int i = 0; i < 2; i++) rt[i] = (li *)calloc(4, sizeof(li));
 	li *r = (li *)calloc(2, sizeof(li));
-	for (int i = 0; i < 3; i++) rt[i] = (li *)calloc(4, sizeof(li));
+	li noZero;
 
-	rt[0] = (li[4]){a, -1, 1, 0};
+	rt[0] = (li[]){a, -1, 1, 0};
 	rt[1][0] = b;
 	rt[1][1] = a / b;
 	rt[1][3] = 1;
 
-	int i = 2;
-	int tam;
-	while ((rt[i][0] = rt[i - 2][0] % rt[i - 1][0]) > 0) {
+	int i = 2, tam;
+	while (1) {
+		noZero = rt[i - 2][0] % rt[i - 1][0];
 		tam = i + 1;
+		if (noZero)
+			rt = (li **)realloc(rt, (tam) * sizeof(li *));
+		else
+			break;
+
+		rt[i] = (li *)calloc(4, sizeof(li));
+		rt[i][0] = noZero;
+
 		rt[i][1] = rt[i - 1][0] / rt[i][0];
 		rt[i][2] = rt[i - 2][2] - rt[i - 1][2] * rt[i - 1][1];
 		rt[i][3] = rt[i - 2][3] - rt[i - 1][3] * rt[i - 1][1];
-		tam++;
-		rt = (li **)realloc(rt, (tam) * sizeof(li *));
-		rt[++i] = (li *)calloc(4, sizeof(li));
+		i++;
 	}
 
 	li *aux = rt[i - 1];
 	r[0] = aux[2];
 	r[1] = aux[3];
-	// for (int j = 0; j < tam; ++j) free(rt[j]);
 	free(aux);
 	free(rt);
 	return r;
@@ -138,10 +144,10 @@ int op() {
 	return opt;
 }
 
-li* exponenciacion(li a , li n) {
-	li* rt, x;
+li *exponenciacion(li a, li n) {
+	li *rt, x;
 	printf("ingrese el numero x\n");
-	scanf("%lu",&x);
+	scanf("%lu", &x);
 
 	return rt;
 }
@@ -179,7 +185,7 @@ li *option(li a, li b, li p, li *j) {
 			*j = 2;
 			break;
 		case 8:
-			rt = exponenciacion(a,b);
+			rt = exponenciacion(a, b);
 			*j = 2;
 			break;
 		default:
