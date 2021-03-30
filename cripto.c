@@ -138,18 +138,44 @@ int op() {
 	  5 -> generar aleatorio\n\
 	  6 -> primo aleatorio\n\
 	  7 -> inverso\n\
-	  8 -> exponenciacion\n");
-
+	  8 -> exponenciacion\n\
+	  9 -> generadores del grupo z\n");
 	scanf("%d", &opt);
 	return opt;
 }
 
 li *exponenciacion(li a, li n) {
-	li *rt, x;
+	li *rt = (li *)calloc(2, sizeof(li)), x;
 	printf("ingrese el numero x\n");
 	scanf("%lu", &x);
 
+	li accum = 1, apow;
+	apow = a;
+	li i = 0, tam;
+	while (1) {
+		if (x & 0x01)
+			accum = (accum * apow) % n;
+			/* accum = (apow) % n; */
+		//printf("accum = %lu\n",accum);
+		x >>= 1;
+		/* x--; */
+		if (x == 0) break;
+		tam = i + 1;
+		apow = (apow * apow) % n;
+		//apow = pow(apow,(i+1));
+		printf("apow = %lu\n",apow);
+		rt = (li *)realloc(rt, tam * sizeof(li));
+		rt[i++] = apow;
+	};
+
+	print(rt, tam);
 	return rt;
+}
+
+li *generadores(li p) {
+	li *zp = (li *)calloc(p - 1, sizeof(li)), x;
+
+	return zp;
 }
 
 li *option(li a, li b, li p, li *j) {
@@ -186,6 +212,10 @@ li *option(li a, li b, li p, li *j) {
 			break;
 		case 8:
 			rt = exponenciacion(a, b);
+			*j = 2;
+			break;
+		case 9:
+			rt = generadores(a);
 			*j = 2;
 			break;
 		default:
