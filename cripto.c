@@ -139,7 +139,8 @@ int op() {
 	  6 -> primo aleatorio\n\
 	  7 -> inverso\n\
 	  8 -> exponenciacion\n\
-	  9 -> generadores del grupo z\n");
+	  9 -> generadores del grupo z\n\
+	  10 -> elemento pertenece a grupo z\n");
 	scanf("%d", &opt);
 	return opt;
 }
@@ -152,10 +153,10 @@ li *exponenciacion(li a, li n) {
 	li accum = 1, apow;
 	apow = a;
 	while (1) {
-		if (x & 0x01){
+		if (x & 0x01) {
 			accum = (accum * apow) % n;
 			rt[0] = accum;
-		} 
+		}
 		x >>= 1;
 		if (x == 0) break;
 		apow = (apow * apow) % n;
@@ -165,13 +166,13 @@ li *exponenciacion(li a, li n) {
 }
 
 li repetido(li x, li *v, li i) {
-	for (li j = 1; j < i; j++) {
+	for (li j = 0; j < i; j++) {
 		if (v[j] == x) return 1;
 	}
 	return 0;
 }
 
-li *generadores(li p, li n, li *tam) {
+li *generadores(li p, li n, li *tam, li (*rep)(li, li *, li)) {
 	li *zp = (li *)calloc(p - 1, sizeof(li)), x = n - 1;
 	li accum = 1, apow;
 	apow = p;
@@ -186,8 +187,10 @@ li *generadores(li p, li n, li *tam) {
 		zp[i++] = accum;
 	}
 
-	for (int j = 0; j < i; j++)
-		if (repetido(zp[j], zp, j - 1)) return NULL;
+	if (rep == NULL) return zp;
+
+	for (int j = 1; j < i; j++)
+		if (rep(zp[j], zp, j - 1)) return NULL;
 
 	return zp;
 }
@@ -197,6 +200,7 @@ li *option(li a, li b, li p, li *j) {
 	int opt = op();
 
 	*j = 1;
+	li x;
 	switch (opt) {
 		case 1:
 			rt = malloc(sizeof(li));
@@ -229,7 +233,16 @@ li *option(li a, li b, li p, li *j) {
 			*j = 1;
 			break;
 		case 9:
-			rt = generadores(a, b, j);
+			rt = generadores(a, b, j, repetido);
+			break;
+		case 10:
+			printf("valor a buscar\n");
+			scanf("%lu", &x);
+			rt = generadores(a, b, j, NULL);
+			if (!repetido(x, rt, *j)) return NULL;
+			break;
+		case 11:
+
 			break;
 		default:
 			return NULL;
