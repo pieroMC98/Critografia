@@ -3,7 +3,7 @@
 void print(li *v, int N) {
 	printf("Resultado:\n");
 	for (int i = 0; i < N; i++) {
-		printf("%ld ", v[i]);
+		printf("%llu ", v[i]);
 	}
 	printf("\n");
 }
@@ -72,7 +72,7 @@ li randomOdd(li p) {
 		aux = randomp(p);
 		c = factorizacion(aux, &j);
 	} while (j != 2);
-	printf("un primo aleatorio de %lu es %lu\n", p, aux);
+	printf("un primo aleatorio de %llu es %llu\n", p, aux);
 	free(c);
 	return aux;
 }
@@ -117,7 +117,7 @@ li *bezout(li a, li b) {
 void euclidesExtendido(li a, li b) {
 	li i = mcd(a, b);
 	li *j = bezout(a, b);
-	printf("el mcd de %lu y %lu es %lu; identidad de bezout s = %lu y t = %lu\n", a, b, i, j[0], j[1]);
+	printf("el mcd de %llu y %llu es %llu; identidad de bezout s = %llu y t = %llu\n", a, b, i, j[0], j[1]);
 }
 
 li *inverso(li a, li b) {
@@ -148,7 +148,7 @@ int op() {
 li *exponenciacion(li a, li n) {
 	li *rt = (li *)calloc(1, sizeof(li)), x;
 	printf("ingrese el numero x\n");
-	scanf("%lu", &x);
+	scanf("%llu", &x);
 
 	li accum = 1, apow;
 	apow = a;
@@ -178,13 +178,14 @@ li *generadores(li p, li n, li *tam, li (*rep)(li, li *, li)) {
 	apow = p;
 	li i = 0;
 
-	while (1) {
-		accum = (li)pow(apow, i) % n;
-		x--;
-		if (x == 0) break;
+	while ( x > 0 ) {
+		accum = (unsigned long long)pow(apow, (i+1)) % n;
+		if(apow == 14)
+		printf("tipeof = %lu ^ %llu mod 19 = %llu\n",sizeof(accum),i+1,accum);
 		*tam = i + 1;
 		zp = (li *)realloc(zp, (*tam) * sizeof(li));
 		zp[i++] = accum;
+		x--;
 	}
 
 	if (rep == NULL) return zp;
@@ -193,6 +194,10 @@ li *generadores(li p, li n, li *tam, li (*rep)(li, li *, li)) {
 		if (rep(zp[j], zp, j - 1)) return NULL;
 
 	return zp;
+}
+
+li legendre(){
+
 }
 
 li *option(li a, li b, li p, li *j) {
@@ -233,11 +238,15 @@ li *option(li a, li b, li p, li *j) {
 			*j = 1;
 			break;
 		case 9:
-			rt = generadores(a, b, j, repetido);
+			for(int i = 1; i < b; i++ ){
+			rt = generadores(i, b, j, repetido);
+			if(rt != NULL)
+				printf("%i\n",i);
+			}
 			break;
 		case 10:
 			printf("valor a buscar\n");
-			scanf("%lu", &x);
+			scanf("%llu", &x);
 			rt = generadores(a, b, j, NULL);
 			if (!repetido(x, rt, *j)) return NULL;
 			break;
