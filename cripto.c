@@ -3,7 +3,7 @@
 void print(li *v, int N) {
 	printf("Resultado:\n");
 	for (int i = 0; i < N; i++) {
-		printf("%llu ", v[i]);
+		printf("%lld ", v[i]);
 	}
 	printf("\n");
 }
@@ -128,7 +128,7 @@ li *inverso(li a, li b) {
 	return rt;
 }
 
-int op() {
+int op(li a, li b, li p) {
 	int opt;
 	printf("Eliga:\n\
 	  1 -> modulo \n\
@@ -140,15 +140,35 @@ int op() {
 	  7 -> inverso\n\
 	  8 -> exponenciacion\n\
 	  9 -> generadores del grupo z\n\
-	  10 -> elemento pertenece a grupo z\n");
+	  10 -> elemento pertenece a grupo z\n\
+	  11 -> simbolo de legendre\n\
+	  12 -> simbolo de jacobi\n\
+	  para los argumentos a = %llu, b = %llu, c = %llu\n",
+	       a, b, p);
 	scanf("%d", &opt);
 	return opt;
 }
 
-li *exponenciacion(li a, li n) {
+li *legendre(li a, li p) {
+	if (1 > a || a >= p) return NULL;
+	if (mcd(a,p) != 1) return NULL;
+
+	li *exp = (li*)malloc(sizeof(li));
+	*exp = (p - 1) / 2;
+	li *rt = exponenciacion(a, p, exp);
+	if( *rt != 1 )
+		if( (p-1) == *rt )
+			*rt = -1;
+	return rt;
+}
+
+li *exponenciacion(li a, li n, li *legendre) {
 	li *rt = (li *)calloc(1, sizeof(li)), x;
-	printf("ingrese el numero x\n");
-	scanf("%llu", &x);
+	if (legendre == NULL) {
+		printf("ingrese el numero x\n");
+		scanf("%llu", &x);
+	} else
+		x = *legendre;
 
 	li accum = 1, apow;
 	apow = a;
@@ -186,16 +206,17 @@ li *generadores(li p, li n, li *tam, li (*rep)(li, li *, li)) {
 
 	if (rep != NULL)
 		for (int j = 1; j < i; j++)
-			if (rep(zp[j], zp, j - 1)) return NULL;
+			if (rep(zp[j], zp, j - 1)) {
+				free(zp);
+				return NULL;
+			}
 
 	return zp;
 }
 
-li legendre() {}
-
 li *option(li a, li b, li p, li *j) {
-	li *rt = (li *)calloc(1, sizeof(li)), *aux;
-	int opt = op();
+	li *rt = NULL, *aux = NULL;
+	int opt = op(a, b, p);
 
 	*j = 1;
 	li x;
@@ -228,7 +249,7 @@ li *option(li a, li b, li p, li *j) {
 			*j = 2;
 			break;
 		case 8:
-			rt = exponenciacion(a, b);
+			rt = exponenciacion(a, b, NULL);
 			*j = 1;
 			break;
 		case 9:
@@ -238,10 +259,9 @@ li *option(li a, li b, li p, li *j) {
 					rt = (li *)realloc(rt, (k + 1) * sizeof(li));
 					rt[k++] = i;
 				}
+				free(aux);
 			}
 			*j = k;
-			free(aux);
-
 			break;
 		case 10:
 			printf("valor a buscar\n");
@@ -249,6 +269,7 @@ li *option(li a, li b, li p, li *j) {
 			rt = generadores(x, p, j, repetido);
 			break;
 		case 11:
+			rt=legendre(a, p);
 
 			break;
 		default:
