@@ -151,15 +151,28 @@ int op(li a, li b, li p) {
 
 li *legendre(li a, li p) {
 	if (1 > a || a >= p) return NULL;
-	if (mcd(a,p) != 1) return NULL;
+	if (mcd(a, p) != 1) return NULL;
 
-	li *exp = (li*)malloc(sizeof(li));
+	li *exp = (li *)malloc(sizeof(li));
 	*exp = (p - 1) / 2;
 	li *rt = exponenciacion(a, p, exp);
-	if( *rt != 1 )
-		if( (p-1) == *rt )
-			*rt = -1;
+
+	free(exp);
+	if (*rt != 1)
+		if ((p - 1) == *rt) *rt = -1;
 	return rt;
+}
+
+li *jacobi(li a, li b) {
+	li j;
+	li *rt = factorizacion(b, &j);
+	li *sol = (li *)malloc(sizeof(li));
+	*sol = 1;
+	for (int i = 0; i < j-1; i++)
+		*sol *= *legendre(a, rt[i]);
+
+	free(rt);
+	return sol;
 }
 
 li *exponenciacion(li a, li n, li *legendre) {
@@ -269,8 +282,10 @@ li *option(li a, li b, li p, li *j) {
 			rt = generadores(x, p, j, repetido);
 			break;
 		case 11:
-			rt=legendre(a, p);
-
+			rt = legendre(a, p);
+			break;
+		case 12:
+			rt = jacobi(a, p);
 			break;
 		default:
 			return NULL;
