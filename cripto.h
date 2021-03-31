@@ -12,5 +12,5 @@ li* bezout(li, li);
 void euclidesExtendido(li, li);
 li* inverso(li, li);
 li* exponenciacion(li, li);
-li* generadores(li , li , li* , li (*)(li, li*, li));
+li* generadores(li, li, li*, li (*)(li, li*, li));
 li repetido(li, li*, li);

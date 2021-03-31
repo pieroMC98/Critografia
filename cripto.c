@@ -173,39 +173,33 @@ li repetido(li x, li *v, li i) {
 }
 
 li *generadores(li p, li n, li *tam, li (*rep)(li, li *, li)) {
-	li *zp = (li *)calloc(p - 1, sizeof(li)), x = n - 1;
+	li *zp = (li *)calloc(n - 1, sizeof(li)), x = n - 1;
 	li accum = 1, apow;
 	apow = p;
 	li i = 0;
 
-	while ( x > 0 ) {
-		accum = (unsigned long long)pow(apow, (i+1)) % n;
-		if(apow == 14)
-		printf("tipeof = %lu ^ %llu mod 19 = %llu\n",sizeof(accum),i+1,accum);
+	for (x = n - 1; x > 0; x--) {
+		accum = (accum * apow) % n;
 		*tam = i + 1;
-		zp = (li *)realloc(zp, (*tam) * sizeof(li));
 		zp[i++] = accum;
-		x--;
 	}
 
-	if (rep == NULL) return zp;
-
-	for (int j = 1; j < i; j++)
-		if (rep(zp[j], zp, j - 1)) return NULL;
+	if (rep != NULL)
+		for (int j = 1; j < i; j++)
+			if (rep(zp[j], zp, j - 1)) return NULL;
 
 	return zp;
 }
 
-li legendre(){
-
-}
+li legendre() {}
 
 li *option(li a, li b, li p, li *j) {
-	li *rt;
+	li *rt = (li *)calloc(1, sizeof(li)), *aux;
 	int opt = op();
 
 	*j = 1;
 	li x;
+	int k = 0;
 	switch (opt) {
 		case 1:
 			rt = malloc(sizeof(li));
@@ -238,17 +232,21 @@ li *option(li a, li b, li p, li *j) {
 			*j = 1;
 			break;
 		case 9:
-			for(int i = 1; i < b; i++ ){
-			rt = generadores(i, b, j, repetido);
-			if(rt != NULL)
-				printf("%i\n",i);
+			for (int i = 1; i < p; i++) {
+				aux = generadores(i, p, j, repetido);
+				if (aux != NULL) {
+					rt = (li *)realloc(rt, (k + 1) * sizeof(li));
+					rt[k++] = i;
+				}
 			}
+			*j = k;
+			free(aux);
+
 			break;
 		case 10:
 			printf("valor a buscar\n");
 			scanf("%llu", &x);
-			rt = generadores(a, b, j, NULL);
-			if (!repetido(x, rt, *j)) return NULL;
+			rt = generadores(x, p, j, repetido);
 			break;
 		case 11:
 
