@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
+#include <regex.h>
 typedef long long int li;
 #define true 1
 #define false 0

@@ -168,8 +168,7 @@ li *jacobi(li a, li b) {
 	li *rt = factorizacion(b, &j);
 	li *sol = (li *)malloc(sizeof(li));
 	*sol = 1;
-	for (int i = 0; i < j-1; i++)
-		*sol *= *legendre(a, rt[i]);
+	for (int i = 0; i < j - 1; i++) *sol *= *legendre(a, rt[i]);
 
 	free(rt);
 	return sol;
