@@ -8,6 +8,62 @@ void print(li *v, int N) {
 	printf("\n");
 }
 
+li *primeNext(li l0, li sum, li *size) {
+	li j;
+	li *rt = cribaEratostenes(l0 + sum, &j);
+	li *prin_gen = (li *)malloc(sizeof(li));
+	*size = 0;
+	for (li k = 0; k < j; k++)
+		if (rt[k] >= l0) {
+			prin_gen = (li *)realloc(prin_gen, (*size + 1) * sizeof(li));
+			prin_gen[(*size)++] = rt[k];
+		}
+
+	free(rt);
+	return prin_gen;
+}
+
+li *gordon(li l0, li sum) {
+	li s, t, j, p0, *c, r;
+	li *previous = cribaEratostenes(l0, &s);
+	s = previous[s - 1];
+	free(previous);
+	li *next = primeNext(l0, sum, &t);
+	t = next[t - 1];
+	free(next);
+	li *aux = malloc(sizeof(li));
+	printf("En una longitud de %llu, el primo previo es %llu y el siguiente %llu para '%lld'\n", sum, s, t, l0);
+	li i = 1;
+	do {
+		r = 2 * t * i + 1;
+		c = factorizacion(r, &j);
+		printf("\npara i = %lld, $r\\leftarrow 2*t*i+1 = %lld$\nfactores de r ", i, r);
+		print(c, j);
+		i++;
+	} while (j != 2);
+
+	*aux = r - 2;
+	li *exp = exponenciacion(s, r, aux);
+	p0 = 2 * s * (*exp) - 1;
+	li p;
+	printf("\npara $i = %lld$, $r\\leftarrow = %lld$ Y $p0 \\leftarrow 2s(s^{r-2} mod(r)) - 1 = %lld$\n", i, r, p0);
+	i = 1;
+	do {
+		p = p0 + 2 * i * r * s;
+		c = factorizacion(p, &j);
+		printf("\npara $j = %lld$, $p \\leftarrow p0 + 2 * j * r * s = %lld$\nfactores de r ", i, p);
+		print(c, j);
+		i++;
+	} while (j != 2);
+	printf("\nsolucion $j = %lld$, $r \\leftarrow 2*t*i+1 = %lld$ Y $p0 \\leftarrow 2s(s^{r-2} mod(r)) - 1 = %lld$ y $p = %llu$\n", i, r, p0,
+	       p);
+	li tam;
+	aux = factorizacion(p,&tam);
+	print(aux,tam);
+	*aux = p;
+	return aux;
+}
+
 li *cribaEratostenes(li N, li *j) {
 	li *m = (li *)calloc(N + 1, sizeof(li));
 	li *rt = (li *)calloc(1, sizeof(li));
@@ -68,6 +124,8 @@ li randomOdd(li p) {
 	li j;
 	li aux;
 	li *c;
+	p = (long long)pow(2, 64) / 2;
+	printf("%lld\n", p);
 	do {
 		aux = randomp(p);
 		c = factorizacion(aux, &j);
