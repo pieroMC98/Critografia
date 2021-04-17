@@ -11,13 +11,10 @@ int main(int argc, char *argv[]) {
 	int a = atol(argv[1]);
 	int b = atol(argv[2]);
 	int p = atol(argv[3]);
-	// li *sol = option(a, b, p, &j);
-	// print(sol, j);
-	// free(sol);
-	// li *next = primeNext(a,10,&j);
-	// print(next,j);
-	gordon(a, 10);
-	// free(next);
-	// if (sol == NULL) return 1;
+	li *sol = option(a, b, p, &j);
+	print(sol, j);
+	free(sol);
+	// gordon(a, 20);
+	if (sol == NULL) return 1;
 	return 0;
 }

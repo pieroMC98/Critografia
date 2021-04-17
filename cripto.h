@@ -14,6 +14,8 @@ void euclidesExtendido(li, li);
 li* inverso(li, li);
 li* gordon(li, li);
 li* exponenciacion(li, li, li*);
+bool isStrongPrime(li, li, li);
+li previousPrime(li);
 li* generadores(li, li, li*, li (*)(li, li*, li));
 li repetido(li, li*, li);
 li* legendre(li, li);
