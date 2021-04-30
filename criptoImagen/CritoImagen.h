@@ -5,5 +5,6 @@ FILE *exits(const char *);
 FILE *option(const char *);
 FILE *insertar(FILE *);
 FILE *extraer(FILE *);
-byte byteToInt(char);
+byte byteToBits(char);
+void prepararFichero(FILE*);
 void printByte(byte);

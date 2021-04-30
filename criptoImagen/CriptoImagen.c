@@ -1,16 +1,15 @@
 #include <stdio.h>
-
 #include "./CritoImagen.h"
 
-byte byteToInt(char B) {
+byte byteToBits(char B) {
 	byte rt = calloc(8, sizeof(byte));
 	for (int i = 8; i >= 0; --i) rt[i] = (char)((B >> i) & 1);
-
 	return rt;
 }
 
 void printByte(byte B) {
-	for (int i = 0; i < 8; i++) printf("%c", B[i]);
+	for (int i = 0; i < 8; i++) printf("%d", B[i]);
+	printf("\n");
 }
 
 const char* fileType(const char* name) {
@@ -59,23 +58,27 @@ char* newFile() {
 	return file;
 }
 
+void prepararFichero(FILE* fp) {
+	unsigned i;
+	fseek(fp,28,SEEK_SET);
+	fread(&i,sizeof(char),2,fp);
+	printf("imagen de %d bits/pixel\n",i);
+	fseek(fp,10,SEEK_SET);
+	fread(&i,sizeof(char),4,fp);
+	printf("direccion de inicio de imagen: %d\n",i);
+}
+
 FILE* cpFile(FILE* out, FILE* in) {
 	fseek(in, 0, SEEK_END);
-	unsigned lecture = 255;
-	char i[lecture];
+	unsigned char i;
 	int tam = ftell(in);
-	rewind(in);
-	fseek(in, 24, SEEK_CUR);
-	unsigned rest = 1;
-
-	while (fseek(in, 0, SEEK_SET) < tam) {
-		//fread(i, sizeof(char), 1, in);
-		printf("leo(%uB):\n", rest);
-		//printf("%d\n",(int) i);
+	int iter, count = 0;
+	while ((iter = ftell(in)) < tam) {
+		fread(&i, sizeof(char), 1, in);
+		printf("%d -> 0X%X, DEC = %d\n",iter, i,i);
+		// printByte(  byteToBits(i));
+		if ( (count++) == 60 ) break;
 		// fwrite(i, rest, sizeof(char), out);
-		rest += lecture;
-		if (rest < tam) continue;
-		rest %= lecture;
 	}
 	return out;
 }
