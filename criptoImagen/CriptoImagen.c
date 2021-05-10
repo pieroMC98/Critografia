@@ -1,8 +1,7 @@
-#include <stdio.h>
 #include "./CritoImagen.h"
 
 byte byteToBits(char B) {
-	byte rt = calloc(8, sizeof(byte));
+	byte rt = (byte)calloc(8, sizeof(bit));
 	for (int i = 8; i >= 0; --i) rt[i] = (char)((B >> i) & 1);
 	return rt;
 }
@@ -58,14 +57,33 @@ char* newFile() {
 	return file;
 }
 
+byte* encoding() {
+	char* string = prepareString();
+	unsigned tam = strlen(string);
+	byte* rt = (byte*)calloc(tam, sizeof(byte));
+
+	for (int i = 0; i < tam; i++)
+		rt[i] = (byte)byteToBits(string[i]);
+	
+	free(string);
+	return rt;
+}
+
 void prepararFichero(FILE* fp) {
 	unsigned i;
-	fseek(fp,28,SEEK_SET);
-	fread(&i,sizeof(char),2,fp);
-	printf("imagen de %d bits/pixel\n",i);
-	fseek(fp,10,SEEK_SET);
-	fread(&i,sizeof(char),4,fp);
-	printf("direccion de inicio de imagen: %d\n",i);
+	fseek(fp, 28, SEEK_SET);
+	fread(&i, sizeof(char), 2, fp);
+	printf("imagen de %d bits/pixel\n", i);
+	fseek(fp, 10, SEEK_SET);
+	fread(&i, sizeof(char), 4, fp);
+	printf("direccion de inicio de imagen: %d\n", i);
+}
+
+char* prepareString() {
+	char* rt = (char*)malloc(20);
+	printf("cadena de texto:");
+	scanf("%s", rt);
+	return rt;
 }
 
 FILE* cpFile(FILE* out, FILE* in) {
@@ -73,11 +91,13 @@ FILE* cpFile(FILE* out, FILE* in) {
 	unsigned char i;
 	int tam = ftell(in);
 	int iter, count = 0;
+
+	printf("cadena -> %s\n", *encoding());
 	while ((iter = ftell(in)) < tam) {
 		fread(&i, sizeof(char), 1, in);
-		printf("%d -> 0X%X, DEC = %d\n",iter, i,i);
+		printf("%d -> 0X%X, DEC = %d\n", iter, i, i);
 		// printByte(  byteToBits(i));
-		if ( (count++) == 60 ) break;
+		if ((count++) == 60) break;
 		// fwrite(i, rest, sizeof(char), out);
 	}
 	return out;
