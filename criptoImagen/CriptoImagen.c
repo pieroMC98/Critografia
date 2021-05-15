@@ -1,8 +1,96 @@
 #include "./CritoImagen.h"
 
+FILE* cpFile(FILE* out, FILE* in) {
+	unsigned char i, aux;
+	int wfpointer = prepararFichero(in);
+	fseek(in, 0, SEEK_END);
+	int tam = ftell(in);
+	rewind(in);
+
+	int iter, count = 0, contador = 0, tamString;
+	char* string = prepareString();
+
+	byte insert = byteToBynary(encoding(&tamString, string), string);
+	free(string);
+	printf("bits a insertar :");
+	printByte(insert);
+
+	while ((iter = ftell(in)) < tam) {
+		fread(&i, sizeof(char), 1, in);
+		aux = i;
+		if (iter >= wfpointer && count < tamString) printf("%ld -> leo = %c\n", ftell(in)-1, i);
+		if (iter >= wfpointer)
+			if (count < tamString)
+				i |= insert[count++];
+		fwrite(&i, sizeof(char), 1, out);
+	}
+	free(insert);
+	return out;
+}
+
+FILE* insertar(FILE* fp) {
+	FILE* out_file = cpFile(fopen(newFile(), "wb"), fp);
+
+	return out_file;
+}
+
+FILE* extraer(FILE* fp) {
+	int fin, count = 0;
+	char i;
+	char* rt = NULL;
+	printf("inserte longitud de la cadena a extraer");
+	scanf("%d", &fin);
+	fin *= 8;
+	rt = (byte)malloc(fin * sizeof(bit));
+	fseek(fp, prepararFichero(fp), SEEK_SET);
+	while ((fin--) > 0) {
+		fread(&i, sizeof(bit), 1, fp);
+		printByte(byteToBits(i));
+		// rt[count++] = i & 0x01;
+		rt[count++] = i & 0x01;
+		printf("%ld -> leo %d de %d\n", ftell(fp), i, rt[count - 1]);
+	}
+	printf("%s\n", bitToChar(rt, 1));
+	return NULL;
+}
+FILE* option(const char* name) {
+	int opt = 0;
+	FILE* fp = exits(name);
+	if (fp == NULL) return NULL;
+	FILE* out;
+	printf("insertar(0) o extraer(1) para \"%s\"\n", name);
+	scanf("%d", &opt);
+	// opt = 0;
+	switch (opt) {
+		case 0:
+			out = insertar(fp);
+			break;
+		case 1:
+			out = extraer(fp);
+			break;
+		default:
+			break;
+	}
+	fclose(fp);
+	return out;
+}
+
 byte byteToBits(char B) {
 	byte rt = (byte)calloc(8, sizeof(bit));
-	for (int i = 8; i >= 0; --i) rt[i] = (char)((B >> i) & 1);
+	for (int i = 8; i >= 0; --i) rt[i] = (char)((B >> i) & 0x01);
+	return rt;
+}
+
+char* bitToChar(byte b, int length) {
+	printByte(b);
+	printf("cadena es =>%s\n", b);
+	char* rt = (char*)malloc(length * sizeof(char));
+	int l = (int)strtol(b, NULL, 2);
+	printf("%X\n", l);
+	//	int j = 0;
+	length *= 8;
+	for (int i = 0; i < length; i++) {
+	}
 	return rt;
 }
 
@@ -51,32 +139,22 @@ FILE* exits(const char* name) {
 
 char* newFile() {
 	char* file = (char*)malloc(BUFSIZ * sizeof(char));
-	printf("Nombre de nuevo archivo\n");
-	// scanf("%s", file);
-	file = "hola.bpm";
+	printf("Nombre de nuevo archivo(sin .bmp)\n");
+	scanf("%s", file);
+	strcat(file, ".bmp");
 	return file;
 }
 
-byte* encoding() {
-	char* string = prepareString();
+byte* encoding(int* cad, char* string) {
 	unsigned tam = strlen(string);
 	byte* rt = (byte*)calloc(tam, sizeof(byte));
 
-	for (int i = 0; i < tam; i++)
-		rt[i] = (byte)byteToBits(string[i]);
-	
-	free(string);
-	return rt;
-}
+	printf("%s, %d\n", string, tam);
+	for (int i = 0; i < tam; i++) rt[i] = (byte)byteToBits(string[i]);
 
-void prepararFichero(FILE* fp) {
-	unsigned i;
-	fseek(fp, 28, SEEK_SET);
-	fread(&i, sizeof(char), 2, fp);
-	printf("imagen de %d bits/pixel\n", i);
-	fseek(fp, 10, SEEK_SET);
-	fread(&i, sizeof(char), 4, fp);
-	printf("direccion de inicio de imagen: %d\n", i);
+	*cad = tam * 8;
+
+	return rt;
 }
 
 char* prepareString() {
@@ -86,46 +164,26 @@ char* prepareString() {
 	return rt;
 }
 
-FILE* cpFile(FILE* out, FILE* in) {
-	fseek(in, 0, SEEK_END);
-	unsigned char i;
-	int tam = ftell(in);
-	int iter, count = 0;
+char* byteToBynary(byte* B, char* string) {
+	char* rt = malloc(strlen(string));
 
-	printf("cadena -> %s\n", *encoding());
-	while ((iter = ftell(in)) < tam) {
-		fread(&i, sizeof(char), 1, in);
-		printf("%d -> 0X%X, DEC = %d\n", iter, i, i);
-		// printByte(  byteToBits(i));
-		if ((count++) == 60) break;
-		// fwrite(i, rest, sizeof(char), out);
-	}
-	return out;
-}
-FILE* insertar(FILE* fp) {
-	FILE* out_file = cpFile(fopen(newFile(), "wb"), fp);
+	int iter = 0;
+	for (int i = 0; i < strlen(string); i++)
+		for (int j = 0; j < 8; j++) rt[iter++] = B[i][j];
 
-	return out_file;
+	return rt;
 }
 
-FILE* extraer(FILE* fp) { return NULL; }
+unsigned prepararFichero(FILE* fp) {
+	unsigned i;
 
-FILE* option(const char* name) {
-	int opt = 0;
-	FILE* fp = exits(name);
-	if (fp == NULL) return NULL;
-	FILE* out;
-	printf("insertar(0) o extraer(1) para \"%s\"\n", name);
-	// scanf("%d", &opt);
-	opt = 0;
-	switch (opt) {
-		case 0:
-			out = insertar(fp);
-			break;
-		case 1:
-			break;
-		default:
-			break;
-	}
-	return out;
+	fseek(fp, 28, SEEK_SET);
+	fread(&i, sizeof(char), 2, fp);
+	printf("imagen de %d bits/pixel\n", i);
+
+	fseek(fp, 10, SEEK_SET);
+	fread(&i, sizeof(char), 4, fp);
+	printf("direccion de inicio de imagen: %d\n", i);
+
+	return i;
 }
