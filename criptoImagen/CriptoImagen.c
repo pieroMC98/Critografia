@@ -18,10 +18,9 @@ FILE* cpFile(FILE* out, FILE* in) {
 	while ((iter = ftell(in)) < tam) {
 		fread(&i, sizeof(char), 1, in);
 		aux = i;
-		if (iter >= wfpointer && count < tamString) printf("%ld -> leo = %c\n", ftell(in)-1, i);
+		if (iter >= wfpointer && count < tamString) printf("%ld -> leo = %c\n", ftell(in) - 1, i);
 		if (iter >= wfpointer)
-			if (count < tamString)
-				i |= insert[count++];
+			if (count < tamString) i |= insert[count++];
 		fwrite(&i, sizeof(char), 1, out);
 	}
 	free(insert);

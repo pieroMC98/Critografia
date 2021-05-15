@@ -236,7 +236,8 @@ int op(li a, li b, li p) {
 	  10 -> elemento pertenece a grupo z\n\
 	  11 -> simbolo de legendre\n\
 	  12 -> simbolo de jacobi\n\
-	  para los argumentos a = %llu, b = %llu, c = %llu\n",
+	  13 -> test de primalidad Miller Rabin\n\
+	  para los argumentos (a, N) = %llu, b = %llu, p = %llu\n",
 	       a, b, p);
 	scanf("%d", &opt);
 	return opt;
@@ -271,16 +272,12 @@ li *legendre(li a, li p) {
 	li *r = restoCuadratico(*rt, p);
 	free(rt);
 	if (r == NULL) {
-		free(r);
 		*exp = -1;
 	} else
 		*exp = 1;
 
-	// free(exp);
-	/* if (*rt != 1) */
-	/* if ((p - 1) == *rt) *rt = -1; */
+	free(r);
 	return exp;
-	/* return rt; */
 }
 
 li *jacobi(li a, li b) {
@@ -290,9 +287,10 @@ li *jacobi(li a, li b) {
 	*sol = 1;
 	for (int i = 0; i < j - 1; i++) {
 		aux = legendre(a, rt[i]);
-		if (aux == NULL)
-			*sol *= 0;
-		else
+		if (aux == NULL) {
+			*sol = 0;
+			break;
+		} else
 			*sol *= *aux;
 		free(aux);
 	}
@@ -352,6 +350,44 @@ li *generadores(li p, li n, li *tam, li (*rep)(li, li *, li)) {
 	return zp;
 }
 
+li mulmod(li a, li b, li mod) {
+	li x = 0, y = a % mod;
+	while (b > 0) {
+		if (b % 2 == 1) {
+			x = (x + y) % mod;
+		}
+		y = (y * 2) % mod;
+		b /= 2;
+	}
+	return x % mod;
+}
+
+int miller_rabin(li N, li p) {
+	int i;
+	li s;
+	if (p < 2) return 0;
+
+	if (p != 2 && p % 2 == 0) return 0;
+
+	s = p - 1;
+	while (s % 2 == 0) s /= 2;
+
+	for (i = 0; i < N; i++) {
+		li a = rand() % (p - 1) + 1, temp = s;
+		li *mod = exponenciacion(a, p, &temp);
+		while (temp != p - 1 && *mod != 1 && *mod != p - 1) {
+			*mod = mulmod(*mod, *mod, p);
+			temp *= 2;
+		}
+		if (*mod != p - 1 && temp % 2 == 0) {
+			free(mod);
+			return 0;
+		}
+		free(mod);
+	}
+	return 1;
+}
+
 li *option(li a, li b, li p, li *j) {
 	li *rt = NULL, *aux = NULL;
 	int opt = op(a, b, p);
@@ -366,7 +402,7 @@ li *option(li a, li b, li p, li *j) {
 			break;
 		case 2:
 			rt = malloc(sizeof(li));
-			rt[0] = mcd(a, b);
+			*rt = mcd(a, b);
 			break;
 		case 3:
 			rt = cribaEratostenes(a, j);
@@ -376,11 +412,11 @@ li *option(li a, li b, li p, li *j) {
 			break;
 		case 5:
 			rt = malloc(sizeof(li));
-			rt[0] = randomp(p);
+			*rt = randomp(p);
 			break;
 		case 6:
 			rt = malloc(sizeof(li));
-			rt[0] = randomOdd(p);
+			*rt = randomOdd(p);
 			break;
 		case 7:
 			rt = inverso(a, b);
@@ -412,21 +448,32 @@ li *option(li a, li b, li p, li *j) {
 		case 12:
 			rt = jacobi(a, p);
 			break;
+		case 13:
+			rt = malloc(sizeof(li));
+			*rt = miller_rabin(a, p);
+			if (!rt) {
+				printf("No es primo\n");
+				free(rt);
+				return NULL;
+			} else
+				printf("Es primo\n");
+			break;
+
 		default:
 			return NULL;
 	}
 
-	for (int i = 1; i <= 5; i++) {
-		a = randomp(p);
-		li *mem = jacobi(a, p);
-		li *mem1 = legendre(a, p);
+	/* for (int i = 1; i <= 5; i++) { */
+	/* a = randomp(p); */
+	/* li *mem = jacobi(a, p); */
+	/* li *mem1 = legendre(a, p); */
 
-		printf("\\item $%lld^\\frac{%lld-1}{2}\\ mod\\ %lld = %lld\\ mod\\ %lld$\n\
-				\\item $\\frac{%lld}{%lld}\\ mod\\ "
-		       "%lld = %lld\\ mod\\ %lld$\\\\\n\n",
-		       a, p, p, *mem, p, a, p, p, *mem1, p);
-		free(mem);
-		free(mem1);
-	}
+	/* printf("\\item $%lld^\\frac{%lld-1}{2}\\ mod\\ %lld = %lld\\ mod\\ %lld$\n\ */
+	/* \\item $\\frac{%lld}{%lld}\\ mod\\ " */
+	/* "%lld = %lld\\ mod\\ %lld$\\\\\n\n", */
+	/* a, p, p, *mem, p, a, p, p, *mem1, p); */
+	/* free(mem); */
+	/* free(mem1); */
+	/* } */
 	return rt;
 }

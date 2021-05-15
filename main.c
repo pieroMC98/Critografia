@@ -1,5 +1,4 @@
 #include "cripto.h"
-#include "header.h"
 int main(int argc, char *argv[]) {
 	srand(time(NULL));
 	if (argc <= 2) {
@@ -12,9 +11,13 @@ int main(int argc, char *argv[]) {
 	int b = atol(argv[2]);
 	int p = atol(argv[3]);
 	li *sol = option(a, b, p, &j);
-	print(sol, j);
-	free(sol);
+	// print(sol, j);
 	// gordon(a, 20);
-	if (sol == NULL) return 1;
+	if (sol == NULL) {
+		free(sol);
+		fprintf(stderr, "Error en las operaciones");
+		return 1;
+	}
+	free(sol);
 	return 0;
 }
