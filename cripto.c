@@ -8,6 +8,97 @@ void print(li *v, int N) {
 	printf("\n");
 }
 
+li previousPrime(li p) {
+	li *c = NULL, j;
+	do {
+		c = factorizacion(--p, &j);
+		free(c);
+	} while (j != 2);
+	return p;
+}
+
+li nPrime(li p) {
+	li *c = NULL, j;
+	do {
+		c = factorizacion(++p, &j);
+		free(c);
+	} while (j != 2);
+	return p;
+}
+
+li *primeNext(li l0, li sum, li *size) {
+	li j;
+	li *rt = cribaEratostenes(l0 + sum, &j);
+	li *prin_gen = (li *)malloc(sizeof(li));
+	*size = 0;
+	for (li k = 0; k < j; k++)
+		if (rt[k] >= l0) {
+			prin_gen = (li *)realloc(prin_gen, (*size + 1) * sizeof(li));
+			prin_gen[(*size)++] = rt[k];
+		}
+
+	free(rt);
+	return prin_gen;
+}
+
+bool isStrongPrime(li pn, li pprevious, li pnext) { return pn > (pprevious + pnext) / 2; }
+
+li *gordon(li l0, li sum) {
+	li s, t, j, p0, *c = NULL, r;
+	li *previous = cribaEratostenes(l0, &s);
+	s = previous[s - 1];
+	free(previous);
+	// li *next = primeNext(l0, sum, &t);
+	// t = next[t - 1];
+	t = nPrime(l0);
+	li *aux = malloc(sizeof(li));
+
+	printf("En una longitud de %llu, el primo previo es %llu y el siguiente %llu para '%lld'\n", sum, s, t, l0);
+	li i = 1;
+	do {
+		r = 2 * t * i + 1;
+		c = factorizacion(r, &j);
+		printf("\npara $i = %lld$, $r\\leftarrow 2*t*i+1 = %lld$\nfactores de r ", i, r);
+		print(c, j);
+		free(c);
+		i++;
+	} while (j != 2);
+
+	*aux = r - 2;
+	li *exp = exponenciacion(s, r, aux);
+	free(aux);
+	p0 = 2 * s * (*exp) - 1;
+	free(exp);
+	li p, pprevious;
+	printf("\npara $i = %lld$, $r\\leftarrow = %lld$ Y $p0 \\leftarrow 2s(s^{r-2} mod(r)) - 1 = %lld$\n", i - 1, r,
+	       p0);
+	i = 1;
+	do {
+		p = p0 + 2 * i * r * s;
+		c = factorizacion(p, &j);
+		printf("\npara $j = %lld$, $p \\leftarrow p0 + 2 * j * r * s = %lld$\nfactores de r ", i, p);
+		print(c, j);
+		free(c);
+		i++;
+	} while (j != 2);
+
+	pprevious = previousPrime(p);
+	printf("El p previo generado con criba de eratostenes es %llu\n", pprevious);
+	printf("\nsolucion $j = %lld$, $r \\leftarrow 2*t*i+1 = %lld$ Y $p0 \\leftarrow 2s(s^{r-2} mod(r)) - 1 = %lld$ "
+	       "y $p = %llu$\n",
+	       i - 1, r, p0, p);
+	li pnext;
+	t = 0;
+	pnext = nPrime(p);
+	// free(next);
+	if (isStrongPrime(p, pprevious, pnext))
+		printf("%lld no es primo fuerte\n", p);
+	else
+		printf("%lld es primo fuerte\n", p);
+	printf("%llu > (%llu + %llu)/2 = %lld\n", p, pprevious, pnext, (pprevious + pnext) / 2);
+	return aux;
+}
+
 li *cribaEratostenes(li N, li *j) {
 	li *m = (li *)calloc(N + 1, sizeof(li));
 	li *rt = (li *)calloc(1, sizeof(li));
@@ -68,6 +159,8 @@ li randomOdd(li p) {
 	li j;
 	li aux;
 	li *c;
+	p = (long long)pow(2, 64) / 2;
+	printf("%lld\n", p);
 	do {
 		aux = randomp(p);
 		c = factorizacion(aux, &j);
@@ -149,33 +242,66 @@ int op(li a, li b, li p) {
 	return opt;
 }
 
+li *restoCuadratico(li a, li p) {
+	if (1 > a || a >= p)
+		if (mcd(a, p) != 1) return NULL;
+	li *rt = (li *)malloc(2 * sizeof(li));
+	int j = 0;
+	*(rt) = -1;
+	*(rt + 1) = -1;
+	for (li i = 1; i < p; i++)
+		if (mod(p * i + a, 5) == mod(a, p) && j < 2) {
+			rt[j++] = sqrt(p * i + 5);
+		}
+	if (rt[0] == -1 || rt[1] == -1) {
+		free(rt);
+		return NULL;
+	}
+
+	return rt;
+}
+
 li *legendre(li a, li p) {
-	if (1 > a || a >= p) return NULL;
-	if (mcd(a, p) != 1) return NULL;
+	if (1 > a || a >= p)
+		if (mcd(a, p) != 1) return NULL;
 
 	li *exp = (li *)malloc(sizeof(li));
 	*exp = (p - 1) / 2;
 	li *rt = exponenciacion(a, p, exp);
+	li *r = restoCuadratico(*rt, p);
+	free(rt);
+	if (r == NULL) {
+		free(r);
+		*exp = -1;
+	} else
+		*exp = 1;
 
-	free(exp);
-	if (*rt != 1)
-		if ((p - 1) == *rt) *rt = -1;
-	return rt;
+	// free(exp);
+	/* if (*rt != 1) */
+	/* if ((p - 1) == *rt) *rt = -1; */
+	return exp;
+	/* return rt; */
 }
 
 li *jacobi(li a, li b) {
-	li j;
+	li j, *aux = NULL;
 	li *rt = factorizacion(b, &j);
 	li *sol = (li *)malloc(sizeof(li));
 	*sol = 1;
-	for (int i = 0; i < j - 1; i++) *sol *= *legendre(a, rt[i]);
-
+	for (int i = 0; i < j - 1; i++) {
+		aux = legendre(a, rt[i]);
+		if (aux == NULL)
+			*sol *= 0;
+		else
+			*sol *= *aux;
+		free(aux);
+	}
 	free(rt);
 	return sol;
 }
 
 li *exponenciacion(li a, li n, li *legendre) {
-	li *rt = (li *)calloc(1, sizeof(li)), x;
+	li *rt = (li *)malloc(sizeof(li)), x;
 	if (legendre == NULL) {
 		printf("ingrese el numero x\n");
 		scanf("%llu", &x);
@@ -288,6 +414,19 @@ li *option(li a, li b, li p, li *j) {
 			break;
 		default:
 			return NULL;
+	}
+
+	for (int i = 1; i <= 5; i++) {
+		a = randomp(p);
+		li *mem = jacobi(a, p);
+		li *mem1 = legendre(a, p);
+
+		printf("\\item $%lld^\\frac{%lld-1}{2}\\ mod\\ %lld = %lld\\ mod\\ %lld$\n\
+				\\item $\\frac{%lld}{%lld}\\ mod\\ "
+		       "%lld = %lld\\ mod\\ %lld$\\\\\n\n",
+		       a, p, p, *mem, p, a, p, p, *mem1, p);
+		free(mem);
+		free(mem1);
 	}
 	return rt;
 }
