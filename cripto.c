@@ -1,4 +1,6 @@
 #include "cripto.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 void print(li *v, int N) {
 	printf("Resultado:\n");
@@ -58,45 +60,49 @@ li *gordon(li l0, li sum) {
 	do {
 		r = 2 * t * i + 1;
 		c = factorizacion(r, &j);
-		printf("\npara $i = %lld$, $r\\leftarrow 2*t*i+1 = %lld$\nfactores de r ", i, r);
-		print(c, j);
 		free(c);
 		i++;
 	} while (j != 2);
+	printf("r = %lld\n",r);
 
 	*aux = r - 2;
-	li *exp = exponenciacion(s, r, aux);
+	li *exp = exponenciacion(s, r, aux,true);
 	free(aux);
-	p0 = 2 * s * (*exp) - 1;
+	p0 = s * (*exp) - 1;
+	if(!p0%2) p0+=r*s;
 	free(exp);
 	li p, pprevious;
 	printf("\npara $i = %lld$, $r\\leftarrow = %lld$ Y $p0 \\leftarrow 2s(s^{r-2} mod(r)) - 1 = %lld$\n", i - 1, r,
 	       p0);
+	printf("p0 = %lld\n",p0);
 	i = 1;
 	do {
 		p = p0 + 2 * i * r * s;
 		c = factorizacion(p, &j);
-		printf("\npara $j = %lld$, $p \\leftarrow p0 + 2 * j * r * s = %lld$\nfactores de r ", i, p);
-		print(c, j);
 		free(c);
 		i++;
 	} while (j != 2);
+	printf("p = %lld\n",p);
 
 	pprevious = previousPrime(p);
 	printf("El p previo generado con criba de eratostenes es %llu\n", pprevious);
-	printf("\nsolucion $j = %lld$, $r \\leftarrow 2*t*i+1 = %lld$ Y $p0 \\leftarrow 2s(s^{r-2} mod(r)) - 1 = %lld$ "
+	printf("\nsolucion $j = %lld$, $r \\leftarrow 2*t*i+1 = %lld$ Y $p0 \\leftarrow s(2s^{r-2} mod(r)) - 1 = %lld$ "
 	       "y $p = %llu$\n",
 	       i - 1, r, p0, p);
 	li pnext;
 	t = 0;
 	pnext = nPrime(p);
-	// free(next);
-	if (isStrongPrime(p, pprevious, pnext))
+	li *rt = malloc(sizeof(li));
+	*rt = p;
+	if (isStrongPrime(p, pprevious, pnext)){
 		printf("%lld no es primo fuerte\n", p);
+		free(rt);
+		return NULL;
+	}
 	else
 		printf("%lld es primo fuerte\n", p);
 	printf("%llu > (%llu + %llu)/2 = %lld\n", p, pprevious, pnext, (pprevious + pnext) / 2);
-	return aux;
+	return rt;
 }
 
 li *cribaEratostenes(li N, li *j) {
@@ -237,7 +243,8 @@ int op(li a, li b, li p) {
 	  11 -> simbolo de legendre\n\
 	  12 -> simbolo de jacobi\n\
 	  13 -> test de primalidad Miller Rabin\n\
-	  para los argumentos (a, N) = %llu, b = %llu, p = %llu\n",
+	  14 -> test de Gordon\n\
+	  para los argumentos (a | N) = %llu, b = %llu, (p | longitud para gordon) = %llu\n",
 	       a, b, p);
 	scanf("%d", &opt);
 	return opt;
@@ -268,7 +275,7 @@ li *legendre(li a, li p) {
 
 	li *exp = (li *)malloc(sizeof(li));
 	*exp = (p - 1) / 2;
-	li *rt = exponenciacion(a, p, exp);
+	li *rt = exponenciacion(a, p, exp,false);
 	li *r = restoCuadratico(*rt, p);
 	free(rt);
 	if (r == NULL) {
@@ -298,7 +305,7 @@ li *jacobi(li a, li b) {
 	return sol;
 }
 
-li *exponenciacion(li a, li n, li *legendre) {
+li *exponenciacion(li a, li n, li *legendre, int gordon) {
 	li *rt = (li *)malloc(sizeof(li)), x;
 	if (legendre == NULL) {
 		printf("ingrese el numero x\n");
@@ -310,13 +317,15 @@ li *exponenciacion(li a, li n, li *legendre) {
 	apow = a;
 	while (1) {
 		if (x & 0x01) {
+			if(accum == 1 && gordon)
+				apow*=2;
 			accum = (accum * apow) % n;
-			rt[0] = accum;
+			*rt = accum;
 		}
 		x >>= 1;
 		if (x == 0) break;
 		apow = (apow * apow) % n;
-	};
+	}
 
 	return rt;
 }
@@ -374,7 +383,7 @@ int miller_rabin(li N, li p) {
 
 	for (i = 0; i < N; i++) {
 		li a = rand() % (p - 1) + 1, temp = s;
-		li *mod = exponenciacion(a, p, &temp);
+		li *mod = exponenciacion(a, p, &temp,false);
 		while (temp != p - 1 && *mod != 1 && *mod != p - 1) {
 			*mod = mulmod(*mod, *mod, p);
 			temp *= 2;
@@ -423,7 +432,7 @@ li *option(li a, li b, li p, li *j) {
 			*j = 2;
 			break;
 		case 8:
-			rt = exponenciacion(a, b, NULL);
+			rt = exponenciacion(a, b, NULL,false);
 			*j = 1;
 			break;
 		case 9:
@@ -458,6 +467,8 @@ li *option(li a, li b, li p, li *j) {
 			} else
 				printf("Es primo\n");
 			break;
+		case 14:
+			rt = gordon(a,p);
 
 		default:
 			return NULL;
