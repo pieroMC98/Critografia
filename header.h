@@ -7,7 +7,11 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
 typedef long long int li;
+
 #define true 1
 #define false 0
 typedef int bool;
