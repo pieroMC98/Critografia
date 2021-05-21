@@ -1,26 +1,56 @@
 #include "./CritoImagen.h"
 
+byte* encoding(int* cad, char* string) {
+	unsigned tam = strlen(string);
+	byte* rt = (byte*)calloc(tam, sizeof(byte));
+
+	printf("%s, %d\n", string, tam);
+	for (int i = 0; i < tam; i++) rt[i] = (byte)byteToBits(string[i]);
+
+	*cad = tam * 8;
+
+	return rt;
+}
+
+char* byteToBynary(byte* B, char* string) {
+	char* rt = malloc(strlen(string) * 8);
+
+	int iter = 0;
+	for (int i = 0; i < strlen(string); i++)
+		for (int j = 0; j < 8; j++) rt[iter++] = B[i][j];
+
+	return rt;
+}
+
 FILE* cpFile(FILE* out, FILE* in) {
-	unsigned char i, aux;
+	unsigned char i;
 	int wfpointer = prepararFichero(in);
 	fseek(in, 0, SEEK_END);
 	int tam = ftell(in);
 	rewind(in);
 
-	int iter, count = 0, contador = 0, tamString;
+	int iter, count = 0, tamString;
 	char* string = prepareString();
 
 	byte insert = byteToBynary(encoding(&tamString, string), string);
 	free(string);
 	printf("bits a insertar :");
-	printByte(insert);
+	for (int i = 0; i < tamString; i++) {
+		printf("%d", insert[i]);
+	}
 
+	printf("Se van a modificar %d bytes del fichero\n", tamString);
 	while ((iter = ftell(in)) < tam) {
 		fread(&i, sizeof(char), 1, in);
-		aux = i;
+		// aux = i;
 		if (iter >= wfpointer && count < tamString) printf("%ld -> leo = %c\n", ftell(in) - 1, i);
 		if (iter >= wfpointer)
-			if (count < tamString) i |= insert[count++];
+			if (count < tamString) {
+				if (!insert[count++])
+					i &= 0xFE;
+				else
+					i |= 0x01;
+			}
 		fwrite(&i, sizeof(char), 1, out);
 	}
 	free(insert);
@@ -33,25 +63,86 @@ FILE* insertar(FILE* fp) {
 	return out_file;
 }
 
+char toHexa(char* B) {
+	char rt = 0;
+	for (int i = 0; i < 8; i++) {
+		printf("%d\n", B[i]);
+		rt += B[i] * pow(10, i);
+		printf("sunm = %d\n", rt);
+	}
+	printf("%d", rt);
+	return rt;
+}
+
+int binary2decimal(char* n) {
+	int i, decimal, mul = 0;
+
+	for (decimal = 0, i = strlen(n) - 1; i >= 0; --i, ++mul) decimal += (n[i] - 48) * (1 << mul);
+
+	return decimal;
+}
+
+int hexa(char *n) {
+	char temp[5];
+	int i, j, d;
+	strcat(n,"\0");
+	printf("Hexa equivalent of %s is : ", n);
+
+	for (i = j = 0; i < binary2decimal(n) % 4; ++i, ++j) temp[j] = n[i];
+	temp[j] = '\0';
+
+	d = binary2decimal(temp);
+
+	while (n[i] != '\0') {
+		for (j = 0; j < 4; ++i, ++j) temp[j] = n[i];
+		temp[j] = '\0';
+
+		d = binary2decimal(temp);
+	}
+	return d;
+}
+
+char* bitToChar(byte b, int length) {
+	byte* rt = (byte*)malloc(length * sizeof(byte));
+	int k = 0;
+	for (int i = 0; i < length; i++) rt[i] = (byte)malloc(8 * sizeof(bit));
+	int tam = length * 8, indice = 0;
+	unsigned char j = 1;
+
+	for (int i = 0; i < length; i++)
+		for (int j = 0; j < 8; j++) {
+			rt[i][j] = (char)b[tam - (indice++) - 1];
+			//rt[i][j] = (char)b[indice++];
+		}
+
+	for (int i = 0; i < 8; i++) printf("%d \n", rt[0][i]);
+
+	int l = (int)strtol((char*)rt[0], NULL, 2);
+	l = hexa(rt[0]);
+	// l = (int)strtol("01001110", NULL, 2);
+	printf("\n%X | %d\n", l, (char)l);
+	return rt;
+}
+
 FILE* extraer(FILE* fp) {
 	int fin, count = 0;
 	char i;
 	char* rt = NULL;
-	printf("inserte longitud de la cadena a extraer");
+	printf("inserte longitud de la cadena a extraer: ");
 	scanf("%d", &fin);
 	fin *= 8;
 	rt = (byte)malloc(fin * sizeof(bit));
 	fseek(fp, prepararFichero(fp), SEEK_SET);
+	// 0100111000101110
+	// 0100111000101110
 	while ((fin--) > 0) {
 		fread(&i, sizeof(bit), 1, fp);
-		printByte(byteToBits(i));
-		// rt[count++] = i & 0x01;
 		rt[count++] = i & 0x01;
-		printf("%ld -> leo %d de %d\n", ftell(fp), i, rt[count - 1]);
 	}
-	printf("%s\n", bitToChar(rt, 1));
+	bitToChar(rt, 2);
 	return NULL;
 }
+
 FILE* option(const char* name) {
 	int opt = 0;
 	FILE* fp = exits(name);
@@ -77,19 +168,6 @@ FILE* option(const char* name) {
 byte byteToBits(char B) {
 	byte rt = (byte)calloc(8, sizeof(bit));
 	for (int i = 8; i >= 0; --i) rt[i] = (char)((B >> i) & 0x01);
-	return rt;
-}
-
-char* bitToChar(byte b, int length) {
-	printByte(b);
-	printf("cadena es =>%s\n", b);
-	char* rt = (char*)malloc(length * sizeof(char));
-	int l = (int)strtol(b, NULL, 2);
-	printf("%X\n", l);
-	//	int j = 0;
-	length *= 8;
-	for (int i = 0; i < length; i++) {
-	}
 	return rt;
 }
 
@@ -144,32 +222,10 @@ char* newFile() {
 	return file;
 }
 
-byte* encoding(int* cad, char* string) {
-	unsigned tam = strlen(string);
-	byte* rt = (byte*)calloc(tam, sizeof(byte));
-
-	printf("%s, %d\n", string, tam);
-	for (int i = 0; i < tam; i++) rt[i] = (byte)byteToBits(string[i]);
-
-	*cad = tam * 8;
-
-	return rt;
-}
-
 char* prepareString() {
 	char* rt = (char*)malloc(20);
 	printf("cadena de texto:");
 	scanf("%s", rt);
-	return rt;
-}
-
-char* byteToBynary(byte* B, char* string) {
-	char* rt = malloc(strlen(string));
-
-	int iter = 0;
-	for (int i = 0; i < strlen(string); i++)
-		for (int j = 0; j < 8; j++) rt[iter++] = B[i][j];
-
 	return rt;
 }
 
