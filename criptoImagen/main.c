@@ -2,7 +2,6 @@
 
 int main(int argc, char *argv[]) {
 	char *test = (char *)malloc(sizeof(char));
-	FILE *fd;
 	if (argc > 1) {
 		int l = strlen(argv[1]) + 1;
 		test = (char *)realloc(test, l * sizeof(char));
@@ -12,10 +11,8 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	if ((fd = option(test)) == NULL) return 1;
+	if(option(test)) return 1;
+
 	free(test);
-
-	fclose(fd);
-
 	return 0;
 }
