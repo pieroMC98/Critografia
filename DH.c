@@ -6,6 +6,7 @@ typedef struct msgbuf {
 	long value;
 	int X;
 } Msg;
+
 key_t returnKey() { return ftok("/dev/null", 1); }
 
 int createMsgTail() { return msgget(returnKey(), 0755 | IPC_CREAT); }
@@ -20,7 +21,7 @@ int run(int alfa, int q) {
 	if (!rt) {
 		printf("mensaje enviado\n");
 	}
-	msgrcv(tail, )
+	msgrcv(tail,&msg, sizeof(msg.X), 1);
 
 		msgctl(tail, IPC_RMID, (struct msqid_ds *)NULL);
 
