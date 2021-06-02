@@ -3,18 +3,10 @@ key_t returnKey() { return ftok("/dev/null", 1); }
 
 int createMsgTail() { return msgget(returnKey(), 0757 | IPC_CREAT); }
 
-li grupoZa(li p, li *j) {
-	li *aux, k, *rt;
-	for (int i = 1; i < p; i++) {
-		aux = generadores(i, p, j, repetido);
-		if (aux != NULL) {
-			rt = (li *)realloc(rt, (k + 1) * sizeof(li));
-			rt[k++] = i;
-		}
-		free(aux);
-	}
-	*j = k;
-	return k;
+li grupoZa(li alfa, li p) {
+	if(generadores(alfa, p, NULL, repetido ) != NULL)
+		return true;
+	return false;
 }
 
 int run(int alfa, int q) {
@@ -29,9 +21,11 @@ int run(int alfa, int q) {
 	else if ((int)info.msg_qnum == 1)
 		envio = 2;
 
-	li *Xa = grupoZa();
+	if(!grupoZa(alfa,q))
+		return 1;
+	li x = randomp(q);
 	msg.value = envio;
-	msg.X = exponenciacion(alfa, q, Xa);
+	msg.X = *exponenciacion(alfa,q,&x,false);
 
 	int rt = msgsnd(tail, (void *)&msg, sizeof(msg.X), IPC_NOWAIT);
 	if (!rt) {
