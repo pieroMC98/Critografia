@@ -1,10 +1,26 @@
 #include "DH.h"
-key_t returnKey() { return ftok("/dev/null", 1); }
+#include <stdio.h>
+#include <stdlib.h>
 
-int createMsgTail() { return msgget(returnKey(), 0757 | IPC_CREAT); }
+key_t returnKey() {
+	key_t key = ftok("/dev/null", 1);
+	 if( key == -1){
+		printf("Error creacion llave papa msg\n");
+		return false;
+	 }
+	 return key;
+}
+
+int createMsgTail() {
+
+	key_t key = returnKey();
+	return key == false ? false : msgget(key, 0757 | IPC_CREAT);
+
+	}
 
 li grupoZa(li alfa, li p) {
-	if (generadores(alfa, p, NULL, repetido) != NULL) return true;
+	li j = 1;
+	if (generadores(alfa, p, &j, repetido) != NULL) return true;
 	return false;
 }
 
@@ -12,8 +28,8 @@ int run(int alfa, int q) {
 	srand(time(NULL) + getpid());
 	Msg msg;
 	int tail = createMsgTail();
+	if(tail == false) return EXIT_FAILURE;
 	struct msqid_ds info;
-
 	int envio = 1;
 	if ((int)!info.msg_qnum)
 		envio = 1;
@@ -23,7 +39,7 @@ int run(int alfa, int q) {
 	if (!grupoZa(alfa, q)) return 1;
 	li x = randomp(q);
 	msg.value = envio;
-	msg.X = *exponenciacion(alfa, q, &x);
+	msg.X = *exponenciacion(alfa, q, &x, false);
 
 	int rt = msgsnd(tail, (void *)&msg, sizeof(msg.X), IPC_NOWAIT);
 	if (!rt) {
@@ -39,6 +55,7 @@ int run(int alfa, int q) {
 	msgctl(tail, IPC_STAT, &info);
 	printf("%d\n", (int)info.msg_qnum);
 
+	rt = msgrcv(tail, &msg, sizeof(msg.X), 3, 0);
 	rt = msgrcv(tail, &msg, sizeof(msg.X), recibo, 0);
 	if (!rt) printf("Esperando mensaje\n");
 

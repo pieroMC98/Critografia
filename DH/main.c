@@ -1,6 +1,6 @@
 #include "./DH.h"
+#include <stdlib.h>
 int main(int argc, char *argv[]) {
-	run(1, 2);
-
+	if(run(1, 2) == EXIT_FAILURE) return EXIT_FAILURE;
 	return 0;
 }

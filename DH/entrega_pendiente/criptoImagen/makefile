@@ -2,7 +2,7 @@
 #macros definition
 
 G++	   = gcc
-source = *.c ./entrega_pendiente/cripto/cripto.c
+source = criptoImagen.c main.c
 
 debug  = -g -Wall
 O 	   = -lm -o
