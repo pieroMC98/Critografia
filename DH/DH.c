@@ -1,8 +1,5 @@
 #include "DH.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-
 key_t returnKey() {
 	key_t key = ftok("/dev/null", 1);
 	if (key == -1) {
@@ -12,10 +9,7 @@ key_t returnKey() {
 	return key;
 }
 
-int createMsgTail() {
-	key_t key = returnKey();
-	return key == false ? false : msgget(key, 0757 | IPC_CREAT);
-}
+int createMsgTail() { return msgget(returnKey(), 0757 | IPC_CREAT); }
 
 li grupoZa(li alfa, li p) {
 	li j = 1;
@@ -27,38 +21,43 @@ int run(int alfa, int q) {
 	srand(time(NULL) + getpid());
 	Msg msg;
 	int tail = createMsgTail();
-	if (tail == false) return EXIT_FAILURE;
+	if (tail < 0) return EXIT_FAILURE;
+
+	if (false == grupoZa(alfa, q)) {
+		printf("alfa (%d) no es generador de q = %d\n", alfa, q);
+		return EXIT_FAILURE;
+	}
+
 	struct msqid_ds info;
+	msgctl(tail, IPC_STAT, &info);
+
 	int envio = 1;
 	if ((int)!info.msg_qnum)
 		envio = 1;
 	else if ((int)info.msg_qnum == 1)
 		envio = 2;
 
-	if (!grupoZa(alfa, q)) return 1;
+	printf("envio es %d\n", envio);
 	li x = randomp(q);
+
 	msg.value = envio;
+	msg.emisor = getpid();
 	msg.X = *exponenciacion(alfa, q, &x, false);
 
-	int rt = msgsnd(tail, (void *)&msg, sizeof(msg.X), IPC_NOWAIT);
-	if (!rt) {
-		printf("mensaje (%d) enviado\n", (int)msg.value);
-	}
+	int rt = msgsnd(tail, (void *)&msg, sizeof(msg.X) + sizeof(msg.emisor), IPC_NOWAIT);
+	if (!rt) printf("Emisor PID %d con prioridad '%ld' y X = %d\n", msg.emisor, msg.value, msg.X);
 
 	int recibo = 0;
-	if ((int)info.msg_qnum == 1)
-		recibo = 2;
-	else if ((int)info.msg_qnum == 2)
-		recibo = 1;
 
 	msgctl(tail, IPC_STAT, &info);
-	printf("%d\n", (int)info.msg_qnum);
+	if ((int)msg.value == 1)
+		recibo = 2;
+	else if ((int)msg.value == 2)
+		recibo = 1;
 
-	rt = msgrcv(tail, &msg, sizeof(msg.X), 3, 0);
-	rt = msgrcv(tail, &msg, sizeof(msg.X), recibo, 0);
-	if (!rt) printf("Esperando mensaje\n");
-
-	printf("mensaje = %d\n", msg.X);
+	printf("Espero mensaje tipo %d\n", recibo);
+	rt = msgrcv(tail, &msg, sizeof(msg.X) + sizeof(msg.emisor), recibo, 0);
+	if (rt) printf("Receptor PID %d con prioridad '%ld' y X = %d\n", msg.emisor, msg.value, msg.X);
 
 	msgctl(tail, IPC_RMID, (struct msqid_ds *)NULL);
 
