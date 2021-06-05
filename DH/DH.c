@@ -1,22 +1,21 @@
 #include "DH.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
 key_t returnKey() {
 	key_t key = ftok("/dev/null", 1);
-	 if( key == -1){
+	if (key == -1) {
 		printf("Error creacion llave papa msg\n");
 		return false;
-	 }
-	 return key;
+	}
+	return key;
 }
 
 int createMsgTail() {
-
 	key_t key = returnKey();
 	return key == false ? false : msgget(key, 0757 | IPC_CREAT);
-
-	}
+}
 
 li grupoZa(li alfa, li p) {
 	li j = 1;
@@ -28,7 +27,7 @@ int run(int alfa, int q) {
 	srand(time(NULL) + getpid());
 	Msg msg;
 	int tail = createMsgTail();
-	if(tail == false) return EXIT_FAILURE;
+	if (tail == false) return EXIT_FAILURE;
 	struct msqid_ds info;
 	int envio = 1;
 	if ((int)!info.msg_qnum)

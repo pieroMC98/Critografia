@@ -1,4 +1,5 @@
 #include "cripto.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -63,18 +64,18 @@ li *gordon(li l0, li sum) {
 		free(c);
 		i++;
 	} while (j != 2);
-	printf("r = %lld\n",r);
+	printf("r = %lld\n", r);
 
 	*aux = r - 2;
-	li *exp = exponenciacion(s, r, aux,true);
+	li *exp = exponenciacion(s, r, aux, true);
 	free(aux);
 	p0 = s * (*exp) - 1;
-	if(!p0%2) p0+=r*s;
+	if (!p0 % 2) p0 += r * s;
 	free(exp);
 	li p, pprevious;
 	printf("\npara $i = %lld$, $r\\leftarrow = %lld$ Y $p0 \\leftarrow 2s(s^{r-2} mod(r)) - 1 = %lld$\n", i - 1, r,
 	       p0);
-	printf("p0 = %lld\n",p0);
+	printf("p0 = %lld\n", p0);
 	i = 1;
 	do {
 		p = p0 + 2 * i * r * s;
@@ -82,7 +83,7 @@ li *gordon(li l0, li sum) {
 		free(c);
 		i++;
 	} while (j != 2);
-	printf("p = %lld\n",p);
+	printf("p = %lld\n", p);
 
 	pprevious = previousPrime(p);
 	printf("El p previo generado con criba de eratostenes es %llu\n", pprevious);
@@ -94,12 +95,11 @@ li *gordon(li l0, li sum) {
 	pnext = nPrime(p);
 	li *rt = malloc(sizeof(li));
 	*rt = p;
-	if (isStrongPrime(p, pprevious, pnext)){
+	if (isStrongPrime(p, pprevious, pnext)) {
 		printf("%lld no es primo fuerte\n", p);
 		free(rt);
 		return NULL;
-	}
-	else
+	} else
 		printf("%lld es primo fuerte\n", p);
 	printf("%llu > (%llu + %llu)/2 = %lld\n", p, pprevious, pnext, (pprevious + pnext) / 2);
 	return rt;
@@ -275,7 +275,7 @@ li *legendre(li a, li p) {
 
 	li *exp = (li *)malloc(sizeof(li));
 	*exp = (p - 1) / 2;
-	li *rt = exponenciacion(a, p, exp,false);
+	li *rt = exponenciacion(a, p, exp, false);
 	li *r = restoCuadratico(*rt, p);
 	free(rt);
 	if (r == NULL) {
@@ -317,8 +317,7 @@ li *exponenciacion(li a, li n, li *legendre, int gordon) {
 	apow = a;
 	while (1) {
 		if (x & 0x01) {
-			if(accum == 1 && gordon)
-				apow*=2;
+			if (accum == 1 && gordon) apow *= 2;
 			accum = (accum * apow) % n;
 			*rt = accum;
 		}
@@ -383,7 +382,7 @@ int miller_rabin(li N, li p) {
 
 	for (i = 0; i < N; i++) {
 		li a = rand() % (p - 1) + 1, temp = s;
-		li *mod = exponenciacion(a, p, &temp,false);
+		li *mod = exponenciacion(a, p, &temp, false);
 		while (temp != p - 1 && *mod != 1 && *mod != p - 1) {
 			*mod = mulmod(*mod, *mod, p);
 			temp *= 2;
@@ -432,7 +431,7 @@ li *option(li a, li b, li p, li *j) {
 			*j = 2;
 			break;
 		case 8:
-			rt = exponenciacion(a, b, NULL,false);
+			rt = exponenciacion(a, b, NULL, false);
 			*j = 1;
 			break;
 		case 9:
@@ -468,7 +467,7 @@ li *option(li a, li b, li p, li *j) {
 				printf("Es primo\n");
 			break;
 		case 14:
-			rt = gordon(a,p);
+			rt = gordon(a, p);
 
 		default:
 			return NULL;

@@ -11,13 +11,12 @@ int main(int argc, char *argv[]) {
 	int b = atol(argv[2]);
 	int p = atol(argv[3]);
 	li *sol = option(a, b, p, &j);
-	// print(sol, j);
-	// gordon(a, 20);
 	if (sol == NULL) {
 		free(sol);
 		fprintf(stderr, "Error en las operaciones");
 		return 1;
 	}
+	print(sol, j);
 	free(sol);
 	return 0;
 }

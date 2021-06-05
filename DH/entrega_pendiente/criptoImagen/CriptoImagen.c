@@ -1,6 +1,7 @@
-#include "./CritoImagen.h"
 #include <stdio.h>
 #include <string.h>
+
+#include "./CritoImagen.h"
 
 byte* encoding(int* cad, char* string) {
 	unsigned tam = strlen(string);
@@ -32,7 +33,7 @@ FILE* cpFile(FILE* out, FILE* in) {
 	byte insert = byteToBynary(encoding(&tamString, string), string);
 	free(string);
 
-	printf("Se van a modificar %d bytes del fichero(cadena de %d caracteres)\n", tamString,tamString/8);
+	printf("Se van a modificar %d bytes del fichero(cadena de %d caracteres)\n", tamString, tamString / 8);
 	while ((iter = ftell(in)) < tam) {
 		fread(&i, sizeof(char), 1, in);
 		if (iter >= wfpointer)
@@ -56,20 +57,17 @@ FILE* insertar(FILE* fp) {
 
 char* bitToChar(byte b, int length) {
 	byte* rt = (byte*)malloc(length * sizeof(byte));
-	char *salida = (byte)malloc(length * sizeof(char));
+	char* salida = (byte)malloc(length * sizeof(char));
 
 	for (int i = 0; i < length; i++) rt[i] = (byte)malloc(9 * sizeof(bit));
 	int tam = length * 8, indice = 0;
 
-	for (int i = length-1; i >= 0 ; --i)
-		for (int j = 0; j < 8; j++)
-				rt[i][j] = !b[tam - (indice++) - 1] ? '0' : '1';
+	for (int i = length - 1; i >= 0; --i)
+		for (int j = 0; j < 8; j++) rt[i][j] = !b[tam - (indice++) - 1] ? '0' : '1';
 
-	for(int i = 0; i < length; i++)
-		rt[i][8] = '\0';
+	for (int i = 0; i < length; i++) rt[i][8] = '\0';
 
-	for(int i = 0; i < length; i++)
-		salida[i]  = (int)strtol((char*)rt[i], NULL, 2);
+	for (int i = 0; i < length; i++) salida[i] = (int)strtol((char*)rt[i], NULL, 2);
 	return salida;
 }
 
@@ -81,7 +79,7 @@ char* extraer(FILE* fp) {
 	scanf("%d", &fin);
 	int aux = fin;
 	fin *= 8;
-	rt = (byte)malloc((fin+1) * sizeof(bit));
+	rt = (byte)malloc((fin + 1) * sizeof(bit));
 	fseek(fp, prepararFichero(fp), SEEK_SET);
 	while ((fin--) > 0) {
 		fread(&i, sizeof(bit), 1, fp);
@@ -97,18 +95,18 @@ int option(const char* name) {
 	FILE* fp = exits(name);
 	if (fp == NULL) return 1;
 	FILE* out = NULL;
-	char *cadena = NULL;
+	char* cadena = NULL;
 	printf("insertar(0) o extraer(1) para \"%s\"\n", name);
 	scanf("%d", &opt);
 	switch (opt) {
 		case 0:
 			out = insertar(fp);
 			free(cadena);
-			if(out == NULL) return 1;
+			if (out == NULL) return 1;
 			break;
 		case 1:
 			cadena = extraer(fp);
-			printf("la cadena extraida es '%s'\n",cadena);
+			printf("la cadena extraida es '%s'\n", cadena);
 			free(cadena);
 			break;
 		default:
