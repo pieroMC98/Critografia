@@ -32,20 +32,24 @@ int run(int alfa, int q) {
 	msgctl(tail, IPC_STAT, &info);
 
 	int envio = 1;
-	if ((int)!info.msg_qnum)
+	if ((int)!info.msg_qnum) {
 		envio = 1;
-	else if ((int)info.msg_qnum == 1)
+		msg.id = 'A';
+	} else if ((int)info.msg_qnum == 1) {
 		envio = 2;
+		msg.id = 'B';
+	}
 
 	printf("envio es %d\n", envio);
 	li x = randomp(q);
-
+	printf("X%c aleatorio = %lld\n", msg.id, x);
 	msg.value = envio;
 	msg.emisor = getpid();
 	msg.X = *exponenciacion(alfa, q, &x, false);
+	char aux_X = msg.id;
 
-	int rt = msgsnd(tail, (void *)&msg, sizeof(msg.X) + sizeof(msg.emisor), IPC_NOWAIT);
-	if (!rt) printf("Emisor PID %d con prioridad '%ld' y X = %d\n", msg.emisor, msg.value, msg.X);
+	int rt = msgsnd(tail, (void *)&msg, sizeof(msg.X) + sizeof(msg.emisor) + sizeof(msg.id), IPC_NOWAIT);
+	if (!rt) printf("Emisor PID %d con prioridad '%ld' y Y%c = %d\n", msg.emisor, msg.value, msg.id, msg.X);
 
 	int recibo = 0;
 
@@ -55,9 +59,11 @@ int run(int alfa, int q) {
 	else if ((int)msg.value == 2)
 		recibo = 1;
 
-	printf("Espero mensaje tipo %d\n", recibo);
-	rt = msgrcv(tail, &msg, sizeof(msg.X) + sizeof(msg.emisor), recibo, 0);
+	printf("\nEspero mensaje tipo %d...\n", recibo);
+	rt = msgrcv(tail, &msg, sizeof(msg.X) + sizeof(msg.emisor) + sizeof(msg.id), recibo, 0);
 	if (rt) printf("Receptor PID %d con prioridad '%ld' y X = %d\n", msg.emisor, msg.value, msg.X);
+	li k = *exponenciacion(msg.X, q, &x, false);
+	printf("K = Y%c^X%c mod q = %d ^ %lld mod %d = %lld\n", msg.id, aux_X, msg.X, x, q, k);
 
 	msgctl(tail, IPC_RMID, (struct msqid_ds *)NULL);
 

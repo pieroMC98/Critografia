@@ -5,6 +5,7 @@
 
 typedef struct msg_buf {
 	long value;
+	char id;
 	pid_t emisor;
 	int X;
 } Msg;
